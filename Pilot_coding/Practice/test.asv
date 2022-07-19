@@ -1,0 +1,279 @@
+%% clear everthing and shuffle random generator
+
+rng('default')
+rng('shuffle')
+
+
+
+
+
+sca;
+clear;
+
+normalscreen = 0;
+
+% clear PsychPortAudio;
+% clear PsychHID;
+% audiodevices = PsychPortAudio('GetDevices');
+% audiodevicenames = {audiodevices.DeviceName};
+% [logicalaudio, locationaudio] = ismember({'HDA Intel PCH: ALC3204 Analog (hw:0,0)'}, audiodevicenames);
+% audiodeviceindex = audiodevices(locationaudio(logicalaudio)).DeviceIndex;
+
+%% parameter
+
+
+
+P.ISI = 3:.1:6;
+% VISUAL
+P.Background   = 150; %background
+P.textsize = 36;
+P.textstyle = 0;
+P.textfont = 'Arial Unicode MS';
+% Colors
+P.Color.black = [0,0,0]; % add black
+P.Color.white = [255,255,255];
+P.Color.yellow = [255,255,0];
+P.Color.red = [255,0,0];
+P.Color.green = [0,255,0];
+P.Color.grey = [128, 128, 128];
+% keys
+KbName('UnifyKeyNames');
+P.Keys.esc = KbName('escape');
+P.Keys.enter = KbName('return');
+P.Keys.spa = KbName('space');
+% Audio
+P.mastervolume = .2;
+P.nrchannels = 2;
+P.audiofreq = 44100;
+P.sugLat = 0; %‘suggestedLatency’ optional requested latency
+% tones
+P.tonedur = .050;
+P.tonefade = 10;
+P.tonefreq = 1000;
+% content
+
+
+ 
+P.cross = '+';
+P.practice.listen = 'listening \n\n\n + \n\n';
+P.practice.remember = 'remebering \n\n\n + \n\n';
+P.practice.produce = 'producing \n\n\n + \n\n';
+% 
+
+
+
+%% obtain some information of experiment
+% inputdlg - open a dialog for input , prompt for what, title for name
+% repmat - to repeat line
+
+prompt = {'Subject Number','Gender[1 = m, 2 = f]', 'Age'};
+title = 'Exp infor';
+definput = {'','',''};
+P.part_infor = inputdlg(prompt, title, [1,50], definput);
+
+
+%% initialize screen
+
+% for writing code with another monitor
+Screen('Preference', 'SkipSyncTests',1);
+disp('ATTENTION: skipped synchtests!')
+whichScreen = 0;
+scsz = get(0,'screensize');
+[w, rect] = Screen(whichScreen,'OpenWindow',0,[0 0 800 500]);
+[screenXpixels, screenYpixels] = Screen(whichScreen,'WindowSize', w);
+
+% get Parameters of the display
+P.rect = rect;
+[P.xcenter, P.ycenter] = RectCenter(P.rect);
+P.ifi          = Screen('GetFlipInterval', w);
+
+Screen('Preference', 'TextRenderer', 1);
+% Screen('Preference', 'TextEncodingLocale', 'UTF8');
+Screen('Preference', 'TextAntiAliasing', 1);
+Screen('Preference', 'TextAlphaBlending', 0);
+
+Screen('FillRect',w, P.Background);
+% color setting for screen is one number.
+
+ 
+
+      
+P.White        = uint8(WhiteIndex(w));
+P.Black        = uint8(BlackIndex(w));
+P.Gray         = double(uint8((P.Black + P.White) / 2));
+P.ScreenWidth  = rect(RectRight);
+P.ScreenHeight = rect(RectBottom);
+
+Screen('TextFont',w,P.textfont);
+Screen('TextSize',w,P.textsize);
+Screen('TextStyle',w,P.textstyle);
+
+Screen('Flip', w);
+
+
+%% initializze PsyPortAudio
+
+beep OFF
+ 
+try
+    PsychPortAudio('Close');
+catch
+end
+
+
+InitializePsychSound(1);
+PsychPortAudio('Verbosity',5);%Set level of verbosity for error/warning/status messages.
+
+%pahandle = PsychPortAudio(‘Open’ [, deviceid][, mode][, reqlatencyclass][, freq][, channels][, buffersize][, suggestedLatency][, selectchannels][, specialFlags=0])
+% paudio = PsychPortAudio('Open',[],1+8,4,P.audiofreq, P.nrchannels, [],[]);
+P.paudio = PsychPortAudio('Open', [], [], 0, P.audiofreq, P.nrchannels,P.sugLat); 
+% PsychPortAudio('Start', paudio,0,0,1);
+
+PsychPortAudio('Volume', P.paudio); %PsychPortAudio(;VolumeP, pahandle [, masterVolume][, channelVolumes])
+
+ 
+
+
+
+
+
+
+%% show instruction
+
+Showpicture(w, 'Pics/Slide1.jpg')
+
+%% got stimulus
+
+P.interval = [1,2,4];
+P.retention = [1,2,4];
+P.maxreptime = 5;
+trialrepeat = 30;
+
+% calualte the time length
+n_interval = size(P.interval,2);
+n_retention = size(P.retention,2);
+lengh = 0;
+ntrial = NaN(n_interval*n_retention,2);
+for i = 1:n_interval
+    for j = 1:n_retention
+
+           
+           
+        ntrial(j+n_retention*(i-1),1) = P.interval(i);
+        ntrial(j+n_retention*(i-1),2) = P.retention(j);
+    end
+end
+
+% repmat(A,m,n) m for height, n for fat
+triallist = repmat(ntrial, trialrepeat,1);
+% ramdon trial: 1 is to get romdon rowrank
+rowrank = randperm(size(triallist,1));
+triallist_r = triallist(rowrank, :);
+
+%% prepare for practices
+
+DrawFormattedText(w,'Practice starts? \n\n\n Press Enter \n\n', 'center', 'center',P.Color.white);
+Screen('Flip', w);
+KbStrokeWait;
+WaitSecs(1);
+
+%% paractics
+for i_trial = 1:5
+    % prepare set up
+    sequence = triallist_r(i_trial,1);
+    retention = triallist_r(i_trial,2);
+    trialcounter = i_trial;
+    One_trial(sequence,retention,i_trial,P,w,P.practice.listen,P.practice.remember,P.practice.produce);
+end
+
+%% prepare for main experiment
+
+DrawFormattedText(w,'Experiment starts? \n\n\n Press Enter \n\n', 'center', 'center',P.Color.white);
+Screen('Flip', w);
+KbStrokeWait;
+WaitSecs(1);
+
+%% main experiment
+try 
+    % for i = 1:size(triallist_r,1)
+    for i_trial = 1:5
+
+        % prepare set up
+        sequence = triallist_r(i_trial,1);
+        retention = triallist_r(i_trial,2);
+        trialcounter = i_trial;
+    
+        T.Trial(trialcounter).trial = i_trial;
+        T.Trial(trialcounter).sequence = sequence;
+        T.Trial(trialcounter).retention = retention;
+    
+        % how many items to be played?
+        T.Trial(trialcounter).n_items = sum(~isnan(sequence));
+        % randomly select an ISI
+        ISI = P.ISI(randperm(size(P.ISI,1)));
+        T.Trial(trialcounter).ISI = ISI;
+    
+        [TimeStamps,Trial] = One_trial(sequence,retention,i_trial,P,w,P.cross,P.cross,P.cross);
+    
+        T.Trial(trialcounter).reptimes = Trial.reptimes;
+        T.Trial(trialcounter).produced = Trial.produced;
+        T.Trial(trialcounter).feedback = Trial.feedback;
+        T.Trial(trialcounter).got_clicks = Trial.got_clicks;
+        T.Trial(trialcounter).max_clicks = Trial.max_clicks;
+        T.Trial(trialcounter).wrongclicks = Trial.wrongclicks;
+    
+        T.TimeStamps(trialcounter).trialstart = TimeStamps.trialstart;
+        T.TimeStamps(trialcounter).encoding_over = TimeStamps.encoding_over;
+        T.TimeStamps(trialcounter).retention_over = TimeStamps.retention_over;
+        T.TimeStamps(trialcounter).feedback = TimeStamps.feedback;
+        T.TimeStamps(trialcounter).trialstop = TimeStamps.trialstop;
+        T.TimeStamps(trialcounter).tonestart = TimeStamps.tonestart; 
+    end 
+    HideCursor;
+catch
+    ShowCursor;
+    sca;
+    psychrethrow(psychlasterror);
+end
+
+%% Save data
+save ([P.outdir filesep P.part_infor{1}  '_' datestr(now,'yyyymmdd') '_Block'],'T','P')
+DrawFormattedText(w,'Thank you', 'center', 'center',P.Color.black);      
+Screen('Flip',w)
+
+%% for more practice trials
+
+% DrawFormattedText(w,double([double('Do you need more training? \n\n\n')...
+%     'Yes，press space；No，Press enter \n\n']), 'center', 'center',P.Color.white);
+% Screen('Flip', w);
+% 
+% while 1     % waiting response
+%     [~, t, key_Code] = KbCheck;      % detect key
+%     
+%     if key_Code(P.Keys.enter)
+% 
+%         for i_trial = 1:3
+%     % prepare set up
+%             sequence = triallist_r(i_trial,1);
+%             retention = triallist_r(i_trial,2);
+%             trialcounter = i_trial;
+%             One_trial(sequence,retention,i_trial,P,w,P.practice.listen,P.practice.remember,P.practice.produce);
+%         end
+% 
+%         break;
+%     end
+% 
+%     if key_Code(P.Keys.spa) 
+%         showInstructions(w,'Slide7.JPG');
+%         break
+%     end      
+% end
+% 
+% DrawFormattedText(w,'Do you need more training? \n\n\n Yes,press Space；No，Press Enter \n\n', 'center', 'center',P.Color.white);
+% Screen('Flip', w);
+
+%% missing sequence
+%  if T.Trial.wrongclicks ~= 0
+% 
+% 
+%  end

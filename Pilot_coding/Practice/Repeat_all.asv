@@ -1,0 +1,116 @@
+function [one_trial] = Repeat_all(trialcounter,repeat,sequence,retention,P,w,Str_listen,Str_remember,Str_repro)
+    
+    one_trial.trial = trialcounter;
+    one_trial.sequence = sequence;
+    one_trial.retention = retention;
+    n_items = length(sequence);
+    one_trial.n_items = n_items;      
+    disp(['Trial ' num2str(trialcounter) ':   (' num2str(sequence) ')     ' num2str(retention)]);
+    %% fixation point
+        for z = 1:round(1/P.ifi) % round get the round number , 1 for showing time
+            Screen('DrawDots', w, [P.xcenter, P.ycenter], 10, P.Color.black, [], 1);
+            one_trial.trialstart = Screen('Flip',w); %trialstart
+        end                
+    %% listening
+    DrawFormattedText(w,Str_listen, 'center', 'center',P.Color.red);
+ 
+    tonestart = Screen('Flip',w);
+    realtonestart = zeros(1,n_items+1);
+    realtonestart(1) = PsychPortAudio('Start', P.paudio,1,tonestart,1);
+    PsychPortAudio('Stop', P.paudio, 1);
+    for i_item = 1:n_items
+        tonestart = realtonestart(i_item) + sequence(i_item);   
+        realtonestart(i_item+1) = PsychPortAudio('Start', P.paudio,1,tonestart,1);
+        PsychPortAudio('Stop', P.paudio, 1);
+    end
+    one_trial.realtonestart = realtonestart;%realtonestart
+    Screen('fillRect',w, P.Background);
+    Screen('Flip',w);
+    WaitSecs(0.1);
+    %% Retention interval
+    DrawFormattedText(w,Str_remember, 'center', 'center',P.Color.yellow);
+    encoding_over = Screen('Flip', w);
+    one_trial.encoding_over = encoding_over; %encoding_over  
+    disp('************************************************************************');
+        while GetSecs <  encoding_over + retention+0.1
+        end       
+    Screen('fillRect',w,P.Background);
+    Screen('Flip',w);
+    WaitSecs(0.1);
+    %% Show index to produce when only repeat one
+    if repeat == 1
+        DrawFormattedText(w,num2str(index), 'center', 'center',P.Color.green);
+        Screen('Flip', w);
+        WaitSecs(0.5);
+    elseif repeat == 0
+    end
+%% Reproduce interval
+    DrawFormattedText(w,Str_repro, 'center', 'center',P.Color.green);
+    retention_over = Screen('Flip', w);% retention_over
+    one_trial.retention_over =  retention_over;
+    if repeat == 1
+        one_trial.Produced_id = NaN(2,1);
+    elseif repeat == 0 
+        one_trial.Produced_id = NaN(n_items+1,1);
+        one_trial.Produced = NaN(n_items,1);
+        one_trial.Error = NaN(n_items,1); 
+    end      
+    max_reptime =  sum(sequence) + P.maxreptime;
+    % how many clicks do we expect?
+    got_clicks = 0;
+    %% wait for a certain time to get responses  
+    keyOfInterest = zeros(1,256);
+    keyOfInterest(KbName({'space','escape','RightArrow'})) = 1;
+    PsychHID('KbQueueCreate',15,keyOfInterest);
+    PsychHID('KbQueueStart',15);    
+    while GetSecs - retention_over < max_reptime   
+        [keyIsDown, firstPress] = PsychHID('KbQueueCheck',15);
+        if keyIsDown  
+           pressedKey = find(firstPress);    
+           pressed_timestemp = firstPress(pressedKey);
+           if pressedKey == P.Keys.esc               
+               return
+           elseif pressedKey == P.Keys.right      
+               break
+           elseif pressedKey == P.Keys.spa
+               got_clicks = got_clicks+1;
+                % RT: from probe offset to klick record click time point
+               one_trial.Produced_id(got_clicks) = pressed_timestemp;  
+           end           
+        end 
+    end
+    
+    PsychHID('KbQueueStop',15); 
+    PsychHID('KbQueueRelease',15); 
+    
+    one_trial.got_clicks = got_clicks;% got_clicks
+    disp(got_clicks)
+%% compute the reproduced durations for feedback
+    if got_clicks  - n_items ~= 1 % wrong number of clicks
+        % display error to participant
+        DrawFormattedText(w,'Wrong clics', 'center', 'center',P.Color.white);
+        one_trial.feedback  = Screen('Flip', w); %timepoint show feedback
+        WaitSecs(0.5);
+  
+    else % right number of clicks
+            
+        % recording produced dur
+        for i_item = 1:n_items
+            one_trial.Produced(i_item) = one_trial.Produced_id(i_item+1)- one_trial.Produced_id(i_item);
+            one_trial.Error(i_item) = one_trial.Produced(i_item) - one_trial.sequence(i_item);
+        end
+        Plot_feedback(w, P,  one_trial.Error);
+        one_trial.feedback  = Screen('Flip', w); %timepoint show feedback   
+        disp(one_trial.Error);
+ 
+    end
+    
+     %% go back to fixation; point
+    % fixation the onset of the fixation crosss defines the start of trial 
+    Screen('Flip', w);
+    trialstop = GetSecs;
+    one_trial.trailstop = trialstop; % trialstop
+    disp('***************************************************************************');
+    disp('***************************************************************************');
+    
+end 
