@@ -1,2 +1,2 @@
-# Duration-ratio-retention
+# RT-in-WM
 Testing ratio model
