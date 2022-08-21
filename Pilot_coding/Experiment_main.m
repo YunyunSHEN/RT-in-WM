@@ -1,14 +1,12 @@
 %% clear everthing and shuffle random generator  
-
 rng('shuffle');
 clc;    
 sca;
 clear;
-normalscreen = 0  ;
-clear PsychPortAudio;    
-           
+normalscreen = 1 ;
+clear PsychPortAudio;      
 clear PsychHID;     
- 
+
 audiodevices = PsychPortAudio('GetDevices');
 audiodevicenames = {audiodevices.DeviceName};
 [logicalaudio, locationaudio] = ismember({'HDA Intel PCH: ALC3204 Analog (hw:0,0)'}, audiodevicenames);
@@ -25,8 +23,7 @@ for keydevice = 1:c
 end 
 P.i_keyboard = i_keyboard;
 %% parameter
-
-P.ISI = 2:.1:6;
+P.ISI = 2:.1:3;
 % VISUAL
 P.Background   = 150; %background
 P.textsize = 36;   
@@ -57,9 +54,9 @@ P.tonefade = 10;
 P.tonefreq = 1000;
 % content
 P.cross = '+';
-P.practice.listen = 'listening \n\n\n + \n\n';
-P.practice.remember = 'remebering \n\n\n + \n\n';
-P.practice.produce = 'producing \n\n\n + \n\n';
+P.practice.listen = 'Ecouter\n\n\n + \n\n';
+P.practice.remember = 'Maintenir \n\n\n + \n\n';
+P.practice.produce = 'Reproduire \n\n\n + \n\n';
 P.maxreptime = 3;
 
 %% Prepare materials
@@ -156,9 +153,9 @@ PsychPortAudio('Volume', P.paudio);
 PsychPortAudio('FillBuffer',P.paudio, P.tone);
 
 %% Block id 
-%     Block_id = [1,2,3];
-%     Block_id = [1,3,2];
-Block_id = 3;
+% Block_id = [2,3];
+Block_id = [1,3,2];
+% Block_id = 3;
 
 %% Experiment design
 try
@@ -166,12 +163,12 @@ try
         block_id = Block_id(block_num);
         if block_id == 1
             %% Block_1 
-            DrawFormattedText(w,'Block-1 \n\n\n Press Anykey \n\n', 'center', 'center',P.Color.white);
+            DrawFormattedText(w,'Experience va commencer \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
             Screen('Flip', w);
             KbStrokeWait;
             WaitSecs(1); 
             %% training
-            DrawFormattedText(w,'Practice will start \n\n\n Press Anykey \n\n', 'center', 'center',P.Color.white);
+            DrawFormattedText(w,'Entrainement  va commencer \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
             Screen('Flip', w);
             KbStrokeWait;
             WaitSecs(1); 
@@ -184,7 +181,7 @@ try
                     trialcounter = i_practice1;
                     Repeat_main(trialcounter,3,1,sequence,retention,P,w,P.practice.listen,P.practice.remember,P.practice.produce);
                 end
-                DrawFormattedText(w,'Do you need more training? \n\n\n Yes: press LeftArrow \n\n\n No: Press RightArrow \n\n', 'center', 'center',P.Color.white);
+                DrawFormattedText(w,'Avez-vous encore besoin de vous entrainer \n\n\n Oui: Appuyez sur la flèche gauche \n\n\n Non: Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
                 Screen('Flip', w);
                 while 1     % waiting response
                     [~, ~, key_Code] = KbCheck;  
@@ -197,15 +194,15 @@ try
                     end      
                 end
             end
-            %% main experiment_1
-            DrawFormattedText(w,'Experiment-block-1 will start \n\n\n Press AnyKey \n\n', 'center', 'center',P.Color.white);
+            %% main experiment_1  
+            DrawFormattedText(w,'Experience va commencer \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
             Screen('Flip', w);
             KbStrokeWait;
             WaitSecs(1);
             %% main experiment check which block experiment   
             i_block = block_id;
             Sequence = P.Sequence1;
-            trial_count = 10;     
+            trial_count = 4;     
 %             trial_count = size(Sequence,1); % TEST trial_count = trialcounter
             trial_data_1 = table; 
             for i_round = 1:2
@@ -213,8 +210,8 @@ try
                     for i_trial = 1:trial_count 
                         trialcounter = i_trial;
                         %% testing to have a rest
-                        if rem(trialcounter/6, 1) == 0
-                            Rest(w,P,30);
+                        if rem(trialcounter/34, 1) == 0
+                            Rest(w,P,15);
                         end
                         %% 1 main trials
                         ISI = P.ISI(randperm(size(P.ISI,1)));
@@ -246,13 +243,13 @@ try
             %% Save data
             name = strcat(P.outdir ,'subject_',P.part_info{1},'_block_', num2str(i_block), '_', date, '.csv');
             writetable(trial_data_1,name);   
-            Rest(w,P,60);
+            Rest(w,P,120);
 %             DrawFormattedText(w,'Having a rest \n\n\n Start experiment Press AnyKey \n\n', 'center', 'center',P.Color.white);
 %             Screen('Flip'  ,w);
 %             KbStrokeWait;          
         elseif block_id == 2
             %% Block 2 retro 1
-            DrawFormattedText(w,'Entrainement-Bloc-2 va commencer \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
+            DrawFormattedText(w,'Entrainement  va commencer \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
             Screen('Flip', w);
             KbStrokeWait;
             WaitSecs(1);          
@@ -260,12 +257,12 @@ try
             P.Sequence_practice_2 = P.Sequence2(1:5,:);
             i_training_2 = 2;
             while i_training_2 == 2 
-                for i_practice2 = 1:5
+                for i_practice2 = 1:2
                     sequence = P.Sequence_practice_2(i_practice2,1:2);
                     retention = P.Sequence_practice_2(i_practice2,3);
                     trialcounter = i_practice2;
                     cue = P.Sequence_practice_2(i_practice2,5);
-                    Repeat_main(trialcounter,1,cue,sequence,retention,P,w,'listen +','Retention +','Reproduce +');
+                    Repeat_main(trialcounter,1,cue,sequence,retention,P,w,P.practice.listen,P.practice.remember,P.practice.produce);
                 end
                     DrawFormattedText(w,'Avez-vous encore besoin de vous entrainer \n\n\n Oui: Appuyez sur la flèche gauche \n\n\n Non: Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
                     Screen('Flip', w);
@@ -281,23 +278,23 @@ try
                     end
              end
         %% 2 main experiment retro 1
-            DrawFormattedText(w,'Experience-bloc-2 va commencer \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
+            DrawFormattedText(w,'Experience va commencer \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
             Screen('Flip', w);
             KbStrokeWait;
             WaitSecs(1);
         %% 2 main experiment check    
             i_block = block_id;
             Sequence = P.Sequence2;
-            trial_count = 60;     
-%             trial_count = size(Sequence,1); % TEST trial_count = trialcounter
+%             trial_count = 4;     
+            trial_count = size(Sequence,1); % TEST trial_count = trialcounter
             trial_data_2 = table; 
             for i_round = 1:2
                 if i_round == 1
                     for i_trial = 1:trial_count 
                         trialcounter = i_trial;
                         %% testing to have a rest
-                        if rem(trialcounter/61, 1) == 0
-                            Rest(w,P,5);
+                        if rem(trialcounter/21, 1) == 0
+                            Rest(w,P,15);
                         end
                         %% main trials
                         ISI = P.ISI(randperm(size(P.ISI,1)));
@@ -311,37 +308,44 @@ try
                     end  
                 end  
                 if i_round == 2
-                    if trial_data_2.cue == 0
-                        re_index = find(trial_data_2.got_clicks -3 ~= 0);  
-                    else
-                        re_index = find(trial_data_2.got_clicks -2 ~= 0); 
-                    end
-    
-                    if re_index ~= 0
-                        for index2 = 1:length(re_index)
-                            trial_count2 =  re_index(index2);
-                            ISI = P.ISI(randperm(size(P.ISI,1)));
-                            sequence = trial_data_2.sequence(index2,:);
-                            retention = trial_data_2.retention(index2);   
-                            cue = trial_data_2.cue(index2);   
-                            [one_trial2] = Repeat_main(trial_count2,1,cue,sequence,retention,P,w,'+','+','+'); 
-                            Trial2 = struct2table(one_trial2_2,'AsArray', true);
-                            trial_data_2 = [trial_data_2;Trial2];
-                            P.result_2 = trial_data_22;
-                            WaitSecs(ISI); 
+                        re_index = [];
+                        for i = 1:i_trial
+                            if trial_data_2(i,:).cue == 0
+                                if trial_data_2(i,:).got_clicks -3 ~= 0
+                                   re_index(end  +1)= i;
+                                end
+                            elseif trial_data_2(i,:).cue ~= 0
+                                if trial_data_2(i,:).got_clicks-2 ~= 0
+                                    re_index(end+1) = i;
+                                end
+                            end
                         end
-                    end
+                       if re_index ~= 0
+                                for index2 = 1:length(re_index)
+                                    trial_count2 =  re_index(index2);
+                                    ISI = P.ISI(randperm(size(P.ISI,1)));
+                                    sequence = trial_data_2.sequence(index2,:);
+                                    retention = trial_data_2.retention(index2);   
+                                    cue = trial_data_2.cue(index2);   
+                                    [one_trial2] = Repeat_main(trial_count2,1,cue,sequence,retention,P,w,'+','+','+'); 
+                                    Trial2 = struct2table(one_trial2,'AsArray', true);
+                                    trial_data_2 = [trial_data_2;Trial2];
+                                    P.result_2 = trial_data_2;
+                                    WaitSecs(ISI);                        
+                                end
+                        end
                 end
             end
             %% Save data
             name = strcat(P.outdir ,'subject_',P.part_info{1},'_block_', num2str(i_block), '_', date, '.csv');
-            writetable(trial_data_22,name);  
-            DrawFormattedText(w,'La pause \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
-            Screen('Flip',w);
-            KbStrokeWait;   
+            writetable(trial_data_2,name);  
+            Rest(w,P,120);
+%             DrawFormattedText(w,'La pause \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
+%             Screen('Flip',w);
+%             KbStrokeWait;   
             %% Block_3 attention 0
             elseif block_id == 3
-            DrawFormattedText(w,'Entrainement-bloc-3 va commencer \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
+            DrawFormattedText(w,'Entrainement va commencer \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
             Screen('Flip', w);
             KbStrokeWait;
             WaitSecs(1);  
@@ -349,12 +353,12 @@ try
             P.Sequence_practice_3 = P.Sequence3(1:5,:);
             i_training_3 = 3;
             while i_training_3 == 3
-                for i_practice3 = 1:5
+                for i_practice3 = 1:2
                     sequence = P.Sequence_practice_3(i_practice3,1:2);
                     retention = P.Sequence_practice_3(i_practice3,3);
                     trialcounter = i_practice3;
                     cue = P.Sequence_practice_3(i_practice3,5);
-                    Repeat_main(trialcounter,0,cue,sequence,retention,P,w,'listen +','Retention +','Reproduce +');
+                    Repeat_main(trialcounter,0,cue,sequence,retention,P,w, P.practice.listen,P.practice.remember,P.practice.produce);
                 end
                     DrawFormattedText(w,'Avez-vous encore besoin de vous entrainer \n\n\n Oui: Appuyez sur la flèche gauche \n\n\n Non: Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
                     Screen('Flip', w);
@@ -370,14 +374,14 @@ try
                     end
             end  
             %% 3 main experiment block_3
-            DrawFormattedText(w,'Experimence-block-3 va commencer \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
+            DrawFormattedText(w,'Experimence va commencer \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
             Screen('Flip', w);
             KbStrokeWait;
             WaitSecs(1);
             %% 3 main experiment
             i_block = block_id;
             Sequence = P.Sequence3;
-%             trial_count = 6;     
+%             trial_count = 4;     
             trial_count = size(Sequence,1); % TEST trial_count = trialcounter
             trial_data_3 = table; 
             for i_round = 1:2
@@ -385,10 +389,10 @@ try
                     for i_trial = 1:trial_count
                         trialcounter = i_trial;
                         %% 3 testing to have a rest
-                        if rem(trialcounter/61, 1) == 0
-                            Rest(w,P,30);
+                        if rem(trialcounter/21, 1) == 0
+                            Rest(w,P,15);
                         end         
-                                                              %% 3 main trials
+                        %% 3 main trials
                         ISI = P.ISI(randperm(size(P.ISI,1)));
                         sequence = Sequence(i_trial,1:2);
                         retention = Sequence(i_trial,3); 
@@ -396,17 +400,27 @@ try
                         [one_trial] = Repeat_main(trialcounter,0,cue,sequence,retention,P,w,'+','+','+');
                         Trial_3 = struct2table(one_trial,'AsArray', true);
                         trial_data_3 = [trial_data_3;Trial_3];    
-                        WaitSecs(ISI);    
-                    end  
+                        WaitSecs(ISI);
+                    end
                 end  
-                
                 if i_round == 2
                     re_index3 = [];
-                    for i = 1:size(trial_data_2)
-                        if cell2mat(trial_data_2.Produced(i)) == 0
-                            disp(trial_data_2.Produced(i));
-                            disp(i);
-                            re_index3 = [re_index3,i];
+%                     for i = 1:size(trial_data_3)
+%                         if cell2mat(trial_data_3.Produced(i)) == 0
+%                             disp(trial_data_3.Produced(i));
+%                             disp(i);
+%                             re_index3 = [re_index3,i];
+%                         end
+%                     end
+                    for i = 1:i_trial
+                        if trial_data_3(i,:).cue == 0
+                            if trial_data_3(i,:).got_clicks -3 ~= 0
+                               re_index3(end  +1)= i;
+                            end
+                        elseif trial_data_3(i,:).cue ~= 0
+                            if trial_data_3(i,:).got_clicks-2 ~= 0
+                                re_index3 (end+1) = i;
+                            end
                         end
                     end
                     if size(re_index3) ~= 0
@@ -419,18 +433,20 @@ try
                             [one_trial2] = Repeat_main(trial_count2,0,cue,sequence,retention,P,w,'+','+','+'); 
                             Trial_3_2 = struct2table(one_trial2,'AsArray', true);
                             trial_data_3 = [trial_data_3;Trial_3_2];
-                            P.result_3 = trial_data_33;
+                            P.result_3 = trial_data_3;
                             WaitSecs(ISI); 
                         end
                     end
                 end
-            end
+
+        end
             %% Save data
         name = strcat(P.outdir ,'subject_',P.part_info{1},'_block_', num2str(i_block), '_', date, '.csv');
-        writetable(trial_data_33,name);
-        DrawFormattedText(w,'La pause \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
-        Screen('Flip'  ,w);
-        KbStrokeWait;
+        writetable(trial_data_3,name);
+        Rest(w,P,120);
+%         DrawFormattedText(w,'La pause \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
+%         Screen('Flip'  ,w);
+%         KbStrokeWait;
         stop = 1;
         end
     end
@@ -441,6 +457,7 @@ try
         Screen('Flip', w);
         sca;
     end
+    %%
 catch exception
 Errors = [P.outdir filesep P.part_info{1}  '_' datestr(now,'yyyymmdd') '_ERROR'];
 save (Errors ,'P');
