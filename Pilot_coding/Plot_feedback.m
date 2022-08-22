@@ -64,7 +64,7 @@ else
             allColors(:,k) = P.Color.black;
         end        
         Screen('FillRect', w, allColors, allRects);
-        Screen('FillRect', w, P.Color.white, [P.xcenter-x_step*10, P.ycenter-1,P.xcenter+x_step*10, P.ycenter+1]);
+        Screen('FillRect', w, P.Color.black, [P.xcenter-x_step*10, P.ycenter-1,P.xcenter+x_step*10, P.ycenter+1]);
         Screen('Flip', w);
     end
 end
