@@ -11,7 +11,7 @@ audiodevices = PsychPortAudio('GetDevices');
 audiodevicenames = {audiodevices.DeviceName};
 [logicalaudio, locationaudio] = ismember({'HDA Intel PCH: ALC3204 Analog (hw:0,0)'}, audiodevicenames);
 audiodeviceindex = audiodevices(locationaudio(logicalaudio)).DeviceIndex;   
-%%
+%% keybord name setting
 [~,~,keyinfo]= GetKeyboardIndices();
 [~,c] = size(keyinfo);
 for keydevice = 1:c
@@ -22,6 +22,7 @@ for keydevice = 1:c
     end
 end 
 P.i_keyboard = i_keyboard;
+
 %% parameter
 P.ISI = 2:.1:3;
 % VISUAL
@@ -114,19 +115,16 @@ end
 % [w, rect] = Screen(whichScreen,'OpenWindow',0,[0,0,500,800]); % seting size
 % [w, rect] = Screen(whichScreen,'OpenWindow',0, [0,0,1920,1080]);
 [screenXpixels, screenYpixels] = Screen(whichScreen,'WindowSize', w);   
- 
 % get Parameters of the display
 P.rect = rect;
 [P.xcenter, P.ycenter] = RectCenter(P.rect);
 P.ifi          = Screen('GetFlipInterval', w);
 P.frame = round(1 / P.ifi);  % frame rate per sec, or round(FrameRate(w))
 P.slack = P.ifi/2;
-
 Screen('Preference', 'TextRenderer', 1);
 % Screen('Preference', 'TextEncodingLocale', 'UTF-8');
 Screen('Preference', 'TextAntiAliasing', 1);
 Screen('Preference', 'TextAlphaBlending', 0);
-
 Screen('FillRect',w, P.Background);
 % color setting for screen is one number.
 P.White        = uint8(WhiteIndex(w));
@@ -154,7 +152,7 @@ PsychPortAudio('FillBuffer',P.paudio, P.tone);
 
 %% Block id 
 % Block_id = [2,3];
-Block_id = [1,3,2];
+Block_id = [1,2,3];
 % Block_id = 3;
 
 %% Experiment design
@@ -175,7 +173,7 @@ try
             P.Sequence_practice_1 = P.Sequence1(1:5,:);
             i_training_1 = 1;
             while i_training_1 == 1 
-                for i_practice1 = 1:2
+                for i_practice1 = 1:5
                     sequence = P.Sequence_practice_1(i_practice1,1);
                     retention = P.Sequence_practice_1(i_practice1,2);
                     trialcounter = i_practice1;
@@ -202,8 +200,8 @@ try
             %% main experiment check which block experiment   
             i_block = block_id;
             Sequence = P.Sequence1;
-            trial_count = 4;     
-%             trial_count = size(Sequence,1); % TEST trial_count = trialcounter
+%             trial_count = 4;     
+            trial_count = size(Sequence,1); % TEST trial_count = trialcounter
             trial_data_1 = table; 
             for i_round = 1:2
                 if i_round == 1
@@ -257,7 +255,7 @@ try
             P.Sequence_practice_2 = P.Sequence2(1:5,:);
             i_training_2 = 2;
             while i_training_2 == 2 
-                for i_practice2 = 1:2
+                for i_practice2 = 1:5
                     sequence = P.Sequence_practice_2(i_practice2,1:2);
                     retention = P.Sequence_practice_2(i_practice2,3);
                     trialcounter = i_practice2;
@@ -353,7 +351,7 @@ try
             P.Sequence_practice_3 = P.Sequence3(1:5,:);
             i_training_3 = 3;
             while i_training_3 == 3
-                for i_practice3 = 1:2
+                for i_practice3 = 1:5
                     sequence = P.Sequence_practice_3(i_practice3,1:2);
                     retention = P.Sequence_practice_3(i_practice3,3);
                     trialcounter = i_practice3;
