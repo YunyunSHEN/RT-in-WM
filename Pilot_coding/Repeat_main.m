@@ -12,7 +12,11 @@ function [one_trial] = Repeat_main(trialcounter,retro,cue,sequence,retention,P,w
 
     DrawFormattedText(w,'+','center','center',P.Color.white);
     one_trial.trialstart = Screen('Flip',w);
-    WaitSecs(0.2);
+    WaitSecs(0.4);
+
+    y = -1*0.23+2*0.65*rand(5,5);
+    x = randi(25);
+    WaitSecs(y(x));
 
     Screen('fillRect',w, P.Background);
     Screen('Flip',w);
@@ -27,7 +31,7 @@ function [one_trial] = Repeat_main(trialcounter,retro,cue,sequence,retention,P,w
         if cue == 0
             DrawFormattedText(w,'TOUT', 'center', 'center',P.Color.black);
             Screen('Flip', w);
-            WaitSecs(0.3);
+            WaitSecs(0.5);
 %             Screen('DrawText',w,'All',P.xcenter,P.ycenter,P.Color.black);
 %             on_set = Screen('Flip', w);
 %             Screen('Flip', w,on_set+0.3-P.slack);
@@ -35,7 +39,7 @@ function [one_trial] = Repeat_main(trialcounter,retro,cue,sequence,retention,P,w
             i_reproduce = cue;
             DrawFormattedText(w,num2str(i_reproduce), 'center', 'center',P.Color.black);
             Screen('Flip', w);
-            WaitSecs(0.3);
+            WaitSecs(0.5);
 %             Screen('DrawText',w,num2str(i_reproduce),P.xcenter,P.ycenter,P.Color.black);
 %             on_set = Screen('Flip', w);
 %             Screen('Flip', w,on_set+0.3-P.slack);
@@ -43,7 +47,7 @@ function [one_trial] = Repeat_main(trialcounter,retro,cue,sequence,retention,P,w
              i_reproduce = cue;
             DrawFormattedText(w,num2str(i_reproduce), 'center', 'center',P.Color.black);
             Screen('Flip', w);
-            WaitSecs(0.3);
+            WaitSecs(0.5);
 %             Screen('DrawText',w,num2str(i_reproduce),P.xcenter,P.ycenter,P.Color.black);
 %             on_set = Screen('Flip', w);
 %             Screen('Flip', w,on_set+0.3-P.slack);
@@ -65,34 +69,6 @@ function [one_trial] = Repeat_main(trialcounter,retro,cue,sequence,retention,P,w
     Screen('fillRect',w, P.Background);
     Screen('Flip',w);
     WaitSecs(0.1);
-    %% Retro cue
-    if retro == 1
-        %% Show index to produce any interval
-        if cue == 0
-            DrawFormattedText(w,'TOUT', 'center', 'center',P.Color.black);
-            Screen('Flip', w);
-            WaitSecs(0.3);
-%             Screen('DrawText',w,'All',P.xcenter,P.ycenter,P.Color.black);
-%             on_set = Screen('Flip', w);
-%             Screen('Flip', w,on_set+0.3-P.slack);
-        elseif cue == 1
-            i_reproduce = cue;
-            DrawFormattedText(w,num2str(i_reproduce), 'center', 'center',P.Color.black);
-            Screen('Flip', w);
-            WaitSecs(0.3);
-%             Screen('DrawText',w,num2str(i_reproduce),P.xcenter,P.ycenter,P.Color.black);
-%             on_set = Screen('Flip', w);
-%             Screen('Flip', w,on_set+0.3-P.slack);
-        elseif cue == 2
-             i_reproduce = cue;
-            DrawFormattedText(w,num2str(i_reproduce), 'center', 'center',P.Color.black);
-            Screen('Flip', w);
-            WaitSecs(0.3);
-%             Screen('DrawText',w,num2str(i_reproduce),P.xcenter,P.ycenter,P.Color.black);
-%             on_set = Screen('Flip', w);
-%             Screen('Flip', w,on_set+0.3-P.slack);
-        end
-    end
     %% Retention interval
 %     for z = 1:round(retention-0.2/P.ifi)% round get the round number , 1 for showing time
 %         disp(z)
@@ -104,13 +80,40 @@ function [one_trial] = Repeat_main(trialcounter,retro,cue,sequence,retention,P,w
     DrawFormattedText(w,Str_remember, 'center', 'center',P.Color.yellow);
 %     Screen('DrawText',w,Str_remember,P.xcenter,P.ycenter,P.Color.yellow);
     encoding_over = Screen('Flip', w);
-    WaitSecs(retention-0.4);
+    WaitSecs(retention);
     one_trial.encoding_over = encoding_over; %encoding_over  
     Screen('fillRect',w,P.Background);
 %     Screen('Flip',w,encoding_over + retention - P.slack);
     Screen('Flip',w);
     WaitSecs(0.1);
-
+    %% Retro cue
+    if retro == 1
+        %% Show index to produce any interval
+        if cue == 0
+            DrawFormattedText(w,'TOUT', 'center', 'center',P.Color.black);
+            Screen('Flip', w);
+            WaitSecs(0.5);
+%             Screen('DrawText',w,'All',P.xcenter,P.ycenter,P.Color.black);
+%             on_set = Screen('Flip', w);
+%             Screen('Flip', w,on_set+0.3-P.slack);
+        elseif cue == 1
+            i_reproduce = cue;
+            DrawFormattedText(w,num2str(i_reproduce), 'center', 'center',P.Color.black);
+            Screen('Flip', w);
+            WaitSecs(0.5);
+%             Screen('DrawText',w,num2str(i_reproduce),P.xcenter,P.ycenter,P.Color.black);
+%             on_set = Screen('Flip', w);
+%             Screen('Flip', w,on_set+0.3-P.slack);
+        elseif cue == 2
+             i_reproduce = cue;
+            DrawFormattedText(w,num2str(i_reproduce), 'center', 'center',P.Color.black);
+            Screen('Flip', w);
+            WaitSecs(0.5);
+%             Screen('DrawText',w,num2str(i_reproduce),P.xcenter,P.ycenter,P.Color.black);
+%             on_set = Screen('Flip', w);
+%             Screen('Flip', w,on_set+0.3-P.slack);
+        end
+    end
 %% Reproduce interval
     DrawFormattedText(w,Str_repro, 'center', 'center',P.Color.green);
 %     Screen('DrawText',w,Str_repro,P.xcenter,P.ycenter,P.Color.green);
