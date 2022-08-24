@@ -151,8 +151,8 @@ PsychPortAudio('Volume', P.paudio);
 PsychPortAudio('FillBuffer',P.paudio, P.tone);
 
 %% Block id 
-% Block_id = [2,3];
-Block_id = [1,2,3];
+Block_id = [1,3,2];
+% Block_id = [1,2,3];
 % Block_id = 3;
 
 %% Experiment design
@@ -200,8 +200,8 @@ try
             %% main experiment check which block experiment   
             i_block = block_id;
             Sequence = P.Sequence1;
-%             trial_count = 4;     
-            trial_count = size(Sequence,1); % TEST trial_count = trialcounter
+            trial_count = 4;     
+%             trial_count = size(Sequence,1); % TEST trial_count = trialcounter
             trial_data_1 = table; 
             for i_round = 1:2
                 if i_round == 1
@@ -232,13 +232,13 @@ try
                             [one_trial2] = Repeat_main(trial_count2,3,1,sequence,retention,P,w,'+','+','+'); 
                             Trial2 = struct2table(one_trial2,'AsArray', true);
                             trial_data_1 = [trial_data_1;Trial2];
-                            P.result_1 = trial_data_1;
                             WaitSecs(ISI); 
                         end
                     end
                 end
             end
             %% Save data
+            P.result_1 = trial_data_1;
             name = strcat(P.outdir ,'subject_',P.part_info{1},'_block_', num2str(i_block), '_', date, '.csv');
             writetable(trial_data_1,name);   
             Rest(w,P,120);
@@ -283,8 +283,8 @@ try
         %% 2 main experiment check    
             i_block = block_id;
             Sequence = P.Sequence2;
-%             trial_count = 4;     
-            trial_count = size(Sequence,1); % TEST trial_count = trialcounter
+            trial_count = 4;     
+%             trial_count = size(Sequence,1); % TEST trial_count = trialcounter
             trial_data_2 = table; 
             for i_round = 1:2
                 if i_round == 1
@@ -328,16 +328,23 @@ try
                                     [one_trial2] = Repeat_main(trial_count2,1,cue,sequence,retention,P,w,'+','+','+'); 
                                     Trial2 = struct2table(one_trial2,'AsArray', true);
                                     trial_data_2 = [trial_data_2;Trial2];
-                                    P.result_2 = trial_data_2;
                                     WaitSecs(ISI);                        
                                 end
                         end
                 end
             end
             %% Save data
+            P.result_2 = trial_data_2;
             name = strcat(P.outdir ,'subject_',P.part_info{1},'_block_', num2str(i_block), '_', date, '.csv');
             writetable(trial_data_2,name);  
-            Rest(w,P,120);
+            if Block_id(3) == 2
+                 DrawFormattedText(w,'Merci beaucoup', 'center', 'center',P.Color.white);
+                Screen('Flip', w);
+                WaitSecs(3);
+                sca;
+            else
+                Rest(w,P,120);
+            end
 %             DrawFormattedText(w,'La pause \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
 %             Screen('Flip',w);
 %             KbStrokeWait;   
@@ -379,8 +386,8 @@ try
             %% 3 main experiment
             i_block = block_id;
             Sequence = P.Sequence3;
-%             trial_count = 4;     
-            trial_count = size(Sequence,1); % TEST trial_count = trialcounter
+            trial_count = 4;     
+%             trial_count = size(Sequence,1); % TEST trial_count = trialcounter
             trial_data_3 = table; 
             for i_round = 1:2
                 if i_round == 1
@@ -431,30 +438,35 @@ try
                             [one_trial2] = Repeat_main(trial_count2,0,cue,sequence,retention,P,w,'+','+','+'); 
                             Trial_3_2 = struct2table(one_trial2,'AsArray', true);
                             trial_data_3 = [trial_data_3;Trial_3_2];
-                            P.result_3 = trial_data_3;
                             WaitSecs(ISI); 
                         end
                     end
                 end
-
-        end
+           end
             %% Save data
+         P.result_3 = trial_data_3;
         name = strcat(P.outdir ,'subject_',P.part_info{1},'_block_', num2str(i_block), '_', date, '.csv');
         writetable(trial_data_3,name);
-        Rest(w,P,120);
+         if Block_id(3) == 3
+                DrawFormattedText(w,'Merci beaucoup', 'center', 'center',P.Color.white);
+                Screen('Flip', w);
+                WaitSecs(3);
+                sca;
+         else
+                Rest(w,P,120);
+         end
 %         DrawFormattedText(w,'La pause \n\n\n Appuyez sur la flèche droite \n\n', 'center', 'center',P.Color.white);
 %         Screen('Flip'  ,w);
 %         KbStrokeWait;
-        stop = 1;
         end
     end
     %% SAVE DATA
     save ([P.outdir filesep P.part_info{1}  '_' datestr(now,'yyyymmdd')],'P');
-    if stop ==1
-        DrawFormattedText(w,'Merci beaucoup', 'center', 'center',P.Color.white);
-        Screen('Flip', w);
-        sca;
-    end
+%     if stop ==1
+%         DrawFormattedText(w,'Merci beaucoup', 'center', 'center',P.Color.white);
+%         Screen('Flip', w);
+%         sca;
+%     end
     %%
 catch exception
 Errors = [P.outdir filesep P.part_info{1}  '_' datestr(now,'yyyymmdd') '_ERROR'];
